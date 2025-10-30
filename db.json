@@ -1,0 +1,93 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "def.user@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": 2,
+      "email": "asd@user.com",
+      "password": "123456"
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "name": "Project A",
+      "userId": 1
+    },
+    {
+      "id": 2,
+      "name": "Project B",
+      "userId": 2
+    },
+    {
+      "id": 3,
+      "name": "Project C",
+      "userId": 1
+    }
+  ],
+  "timelogs": [
+    {
+      "id": 13,
+      "title": "Nov 1st week",
+      "description": "",
+      "date": "Wed Nov 05 2025",
+      "projectId": 1,
+      "userId": 1,
+      "hours": "04:00",
+      "billable": true
+    },
+    {
+      "id": 12,
+      "title": "Nov 1st week",
+      "description": "",
+      "date": "Tue Nov 04 2025",
+      "projectId": 1,
+      "userId": 1,
+      "hours": "08:00",
+      "billable": true
+    },
+    {
+      "id": 11,
+      "title": "nov log",
+      "description": "",
+      "date": "Tue Nov 11 2025",
+      "projectId": 1,
+      "userId": 1,
+      "hours": "02:00",
+      "billable": true
+    },
+    {
+      "id": 10,
+      "title": "hg",
+      "description": "uyg",
+      "date": "Fri Oct 31 2025",
+      "projectId": 1,
+      "userId": 1,
+      "hours": "00:01",
+      "billable": true
+    },
+    {
+      "id": 9,
+      "title": "demo",
+      "description": "fg",
+      "date": "Thu Oct 30 2025",
+      "projectId": 1,
+      "userId": 1,
+      "hours": "07:28",
+      "billable": true
+    },
+    {
+      "id": 14,
+      "title": "Nov 1st week",
+      "description": "",
+      "date": "Thu Nov 06 2025",
+      "projectId": 1,
+      "userId": 1,
+      "hours": "06:00",
+      "billable": true
+    }
+  ]
+}
