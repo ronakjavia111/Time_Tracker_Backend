@@ -3,11 +3,18 @@ const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const cors = require("cors");
-const { log } = require("console");
+const shortId = require("shortid");
 
 const server = jsonServer.create();
 const router = jsonServer.router("db.json");
-const userdb = JSON.parse(fs.readFileSync("db.json", "UTF-8"));
+const DB_FILE = "db.json";
+
+// Read DB file
+const getDb = () => JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+
+// Write DB file
+const saveDb = (data) =>
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 
 server.use(cors());
 server.use(bodyParser.urlencoded({ extended: true }));
@@ -28,11 +35,31 @@ function verifyToken(token) {
   }
 }
 
+// Auto ID middleware
+server.use((req, res, next) => {
+  if (req.method === "POST" && !req.body.id) {
+    req.body.id = shortId.generate();
+  }
+  next();
+});
+
+// Reload db.json before GET only
+server.use((req, res, next) => {
+  if (req.method === "GET") {
+    try {
+      router.db.setState(JSON.parse(fs.readFileSync("db.json", "UTF-8")));
+    } catch (err) {
+      console.error("Error reloading db.json:", err);
+    }
+  }
+  next();
+});
+
 // --- LOGIN ---
 server.post("/auth/login", (req, res) => {
   const { email, password } = req.body;
 
-  const user = userdb.users.find(
+  const user = getDb().users.find(
     (u) => u.email === email && u.password === password
   );
 
@@ -45,6 +72,7 @@ server.post("/auth/login", (req, res) => {
 // --- REGISTER ---
 server.post("/auth/register", (req, res) => {
   const { email, password } = req.body;
+  const db = getDb();
 
   if (email === "" || email === null || email === undefined)
     return res
@@ -56,19 +84,18 @@ server.post("/auth/register", (req, res) => {
       .status(400)
       .json({ message: "The Password is empty, null, or undefined." });
 
-  if (userdb.users.find((u) => u.email === email)) {
+  if (db.users.find((u) => u.email === email)) {
     return res.status(400).json({ message: "User already exists." });
   }
 
   const newUser = {
-    id: userdb.users.length + 1,
+    id: shortId.generate(),
     email: email,
     password: password,
   };
 
-  userdb.users.push(newUser);
-
-  fs.writeFileSync("db.json", JSON.stringify(userdb, null, 2));
+  db.users.push(newUser);
+  saveDb(db);
 
   return res.status(201).json({ message: "User Registered Succesfully." });
 });
@@ -77,6 +104,8 @@ server.post("/auth/register", (req, res) => {
 server.post("/timelogs", (req, res) => {
   const { projectId, userId, title, description, date, hours, billable } =
     req.body;
+
+  const db = getDb();
 
   if (
     [projectId, userId, title, date, hours, billable].some(
@@ -88,16 +117,16 @@ server.post("/timelogs", (req, res) => {
     });
   }
 
-  if (!userdb.users.find((u) => u.id === userId)) {
+  if (!db.users.find((u) => u.id === userId)) {
     return res.status(400).json({ message: "User does not exist." });
   }
 
-  if (!userdb.projects.find((p) => p.id === projectId)) {
+  if (!db.projects.find((p) => p.id === projectId)) {
     return res.status(400).json({ message: "Project does not exist." });
   }
 
-  const newTimeLog = {
-    id: userdb.timelogs.sort((x, y) => y.id - x.id)[0].id + 1,
+  let newTimeLog = {
+    id: req.body.id,
     title: title,
     description: description || "",
     date: date,
@@ -107,24 +136,35 @@ server.post("/timelogs", (req, res) => {
     billable: billable,
   };
 
-  userdb.timelogs.push(newTimeLog);
-  fs.writeFileSync("db.json", JSON.stringify(userdb, null, 2));
+  db.timelogs.push(newTimeLog);
+  saveDb(db);
 
-  return res.status(201).json({ message: "TimeLog Added Succesfully." });
+  newTimeLog = {
+    ...newTimeLog,
+    projectName: db.projects.find((p) => p.id === projectId)?.name,
+  };
+  
+  return res
+    .status(201)
+    .json({ data: newTimeLog, message: "TimeLog Added Succesfully." });
 });
 
 // --- Delete TimeLog ---
 server.delete("/timelogs", (req, res) => {
   const id = req.body.id;
-  console.log(id);
 
   if (!id) return res.status(401).json({ message: "Invalid UserId." });
 
-  const timeLog = userdb.timelogs.find((x) => x.id === id);
-  if (!timeLog)
-    return res.status(401).json({ message: "Record does not exist." });
+  const db = getDb();
+  const recordIndex = db.timelogs.findIndex((log) => log.id === id);
 
-  userdb.timelogs.delete(timeLog);
+  if (recordIndex === -1) {
+    return res.status(404).json({ error: "Record not found" });
+  }
+
+  db.timelogs.splice(recordIndex, 1);
+  saveDb(db);
+
   return res.status(201).json({ message: "TimeLog Deleted Successfully." });
 });
 
@@ -145,9 +185,10 @@ server.use(/^(?!\/auth).*$/, (req, res, next) => {
   }
 });
 
-// --- JSON SERVER ROUTES ---
+// --- USE ROUTER ---
 server.use(router);
 
 // --- START SERVER ---
 const PORT = 3000;
+
 server.listen(PORT);
