@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const cors = require("cors");
 const shortId = require("shortid");
+const { get } = require("http");
+const { log, time } = require("console");
+const { pseudoRandomBytes } = require("crypto");
 
 const server = jsonServer.create();
 const router = jsonServer.router("db.json");
@@ -59,13 +62,18 @@ server.use((req, res, next) => {
 server.post("/auth/login", (req, res) => {
   const { email, password } = req.body;
 
-  const user = getDb().users.find(
-    (u) => u.email === email && u.password === password
-  );
+  const userExist = getDb().users.find((u) => u.email === email);
+  if (!userExist) return res.status(401).json({ message: "User not Found" });
 
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
+  const validPassword = userExist.password === password;
+  if (!validPassword)
+    return res.status(401).json({ message: "Invalid Credentials" });
 
-  const token = createToken({ email: email, id: user.id, expiresIn: expIn });
+  const token = createToken({
+    email: email,
+    id: userExist.id,
+    expiresIn: expIn,
+  });
   res.status(200).json({ token });
 });
 
@@ -126,7 +134,7 @@ server.post("/timelogs", (req, res) => {
   }
 
   let newTimeLog = {
-    id: req.body.id,
+    id: shortId.generate(),
     title: title,
     description: description || "",
     date: date,
@@ -143,17 +151,38 @@ server.post("/timelogs", (req, res) => {
     ...newTimeLog,
     projectName: db.projects.find((p) => p.id === projectId)?.name,
   };
-  
+
   return res
     .status(201)
     .json({ data: newTimeLog, message: "TimeLog Added Succesfully." });
+});
+
+// --- Update TimeLog ---
+server.patch("/timelogs", (req, res) => {
+  const { timeLogId, date } = req.body;
+
+  if (!timeLogId)
+    return res.status(401).json({ message: "Invalid TimeLogId." });
+
+  if (!date || date === "")
+    return res.status(401).json({ message: "Invalid Date." });
+
+  const db = getDb();
+  let timeLog = db.timelogs.find((x) => x.id === timeLogId);
+
+  if (!timeLog) return res.status(401).json({ message: "TimeLog not found." });
+
+  timeLog.date = new Date(date).toDateString();
+  saveDb(db);
+
+  return res.status(200).json({ message: "TimeLog Updated Successfully" });
 });
 
 // --- Delete TimeLog ---
 server.delete("/timelogs", (req, res) => {
   const id = req.body.id;
 
-  if (!id) return res.status(401).json({ message: "Invalid UserId." });
+  if (!id) return res.status(401).json({ message: "Invalid TimeLogId." });
 
   const db = getDb();
   const recordIndex = db.timelogs.findIndex((log) => log.id === id);
@@ -166,6 +195,59 @@ server.delete("/timelogs", (req, res) => {
   saveDb(db);
 
   return res.status(201).json({ message: "TimeLog Deleted Successfully." });
+});
+
+// --- Add Project ---
+server.post("/project", (req, res) => {
+  const { userId, name } = req.body;
+
+  if (!userId) return res.status(400).json({ message: "Invalid UserId" });
+
+  if (!name || name == "")
+    return res.status(400).json({ message: "Invalid Name" });
+
+  const db = getDb();
+  const userExist = db.users.findIndex((x) => x.id === userId);
+
+  if (userExist === -1)
+    return res.status(400).json({ message: "Failed to Add Project" });
+
+  const addProject = {
+    id: shortId.generate(),
+    name: name,
+    userId: userId,
+  };
+
+  db.projects.push(addProject);
+  saveDb(db);
+
+  return res
+    .status(200)
+    .json({ data: addProject, message: "Project Added Successfully." });
+});
+
+// --- Delete Project ---
+server.delete("/project", (req, res) => {
+  const projectId = req.body.id;
+
+  if (!projectId)
+    return res.status(400).json({ message: "Invalid Project Id" });
+
+  const db = getDb();
+  const project = db.projects.find((x) => x.id === projectId);
+
+  const userExist = db.users.findIndex((x) => x.id === project.userId);
+  if (userExist === -1) {
+    return res.status(400).json({ message: "Failed to Delete Project." });
+  }
+
+  const projectInd = db.projects.findIndex((x) => x.id === projectId);
+
+  db.timelogs = db.timelogs.filter((log) => log.projectId !== project.id);
+  db.projects.splice(projectInd, 1);
+  saveDb(db);
+
+  return res.status(200).json({ message: "Project Deleted Successfully." });
 });
 
 // --- AUTH MIDDLEWARE ---

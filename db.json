@@ -1,102 +1,62 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "6ZOmg1-46Y",
       "email": "def.user@gmail.com",
-      "password": "123456"
-    },
-    {
-      "id": 2,
-      "email": "asd@user.com",
       "password": "123456"
     }
   ],
   "projects": [
     {
-      "id": 1,
-      "name": "Project A",
-      "userId": 1
-    },
-    {
-      "id": 2,
+      "id": "kLLMl32d7p",
       "name": "Project B",
-      "userId": 2
+      "userId": "6ZOmg1-46Y"
     },
     {
-      "id": 3,
-      "name": "Project C",
-      "userId": 1
+      "id": "SLLyS8kAMI",
+      "name": "Project A",
+      "userId": "6ZOmg1-46Y"
     }
   ],
   "timelogs": [
     {
-      "id": "ILxwSWV6j",
-      "title": "oij",
+      "id": "5Z61JOlESb",
+      "title": "Nov 3rd Week 1st Log",
       "description": "",
-      "date": "Fri Oct 31 2025",
-      "projectId": 1,
-      "userId": 1,
-      "hours": "01:02",
+      "date": "Mon Nov 10 2025",
+      "projectId": "kLLMl32d7p",
+      "userId": "6ZOmg1-46Y",
+      "hours": "09:00",
       "billable": true
     },
     {
-      "id": "mCmHBECtC",
-      "title": "8u9",
+      "id": "iz07FYBwse",
+      "title": "Nov 3rd Week 1st Log",
       "description": "",
-      "date": "Sat Oct 11 2025",
-      "projectId": 1,
-      "userId": 1,
-      "hours": "01:58",
+      "date": "Tue Nov 11 2025",
+      "projectId": "kLLMl32d7p",
+      "userId": "6ZOmg1-46Y",
+      "hours": "07:00",
       "billable": true
     },
     {
-      "id": "ghtfMPwcr",
-      "title": "iu",
+      "id": "PMTh-z7QNG",
+      "title": "Nov 3rd Week 1st Log",
       "description": "",
-      "date": "Fri Oct 03 2025",
-      "projectId": 3,
-      "userId": 1,
-      "hours": "01:59",
+      "date": "Thu Nov 13 2025",
+      "projectId": "kLLMl32d7p",
+      "userId": "6ZOmg1-46Y",
+      "hours": "08:00",
       "billable": true
     },
     {
-      "id": "QRPJi-bv0",
-      "title": "oi",
-      "description": "",
-      "date": "Mon Oct 13 2025",
-      "projectId": 3,
-      "userId": 1,
-      "hours": "01:58",
-      "billable": true
-    },
-    {
-      "id": "R7rQDRTIM",
-      "title": "fg",
-      "description": "",
-      "date": "Tue Oct 28 2025",
-      "projectId": 1,
-      "userId": 1,
-      "hours": "18:22",
-      "billable": true
-    },
-    {
-      "id": "eW3k2CTb6E",
-      "title": "98y",
-      "description": "",
-      "date": "Tue Oct 28 2025",
-      "projectId": 3,
-      "userId": 1,
-      "hours": "18:22",
-      "billable": true
-    },
-    {
-      "id": "W3UUJIg0l5",
-      "title": "98y",
-      "description": "",
-      "date": "Wed Oct 29 2025",
-      "projectId": 3,
-      "userId": 1,
-      "hours": "18:22",
+      "id": "gG6SwLJxrW",
+      "title": "hgc",
+      "description": "hgf",
+      "date": "Mon Nov 03 2025",
+      "projectId": "kLLMl32d7p",
+      "userId": "6ZOmg1-46Y",
+      "hours": "05:00",
       "billable": true
     }
   ]
