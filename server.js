@@ -180,7 +180,7 @@ server.patch("/timelogs", (req, res) => {
 
 // --- Delete TimeLog ---
 server.delete("/timelogs", (req, res) => {
-  const id = req.body.id;
+  const { id } = req.body;
 
   if (!id) return res.status(401).json({ message: "Invalid TimeLogId." });
 
